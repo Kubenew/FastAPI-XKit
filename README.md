@@ -1,71 +1,91 @@
 # fastapi-xkit
 
 FastAPI-XKit is a production toolkit for FastAPI.
+# FastAPI-XKit 🚀
 
-## Features (v0.2.0)
-- Redis rate limiter backend
-- JWT authentication dependency
-- RBAC (role-based access control) dependency
-- Audit logs written to SQL database (SQLAlchemy)
-- OpenTelemetry ASGI instrumentation + OTLP exporter
-- Request-ID middleware
-- `/health` endpoint
+[![PyPI version](https://img.shields.io/pypi/v/fastapi-xkit.svg)](https://pypi.org/project/fastapi-xkit/)
+[![Downloads](https://static.pepy.tech/badge/fastapi-xkit)](https://pepy.tech/project/fastapi-xkit)
+[![License: MIT](https://img.shields.io/pypi/l/fastapi-xkit)](https://github.com/yourname/fastapi-xkit/blob/main/LICENSE)
+[![Python Versions](https://img.shields.io/pypi/pyversions/fastapi-xkit)](https://pypi.org/project/fastapi-xkit/)
 
-## Install
+FastAPI-XKit is a production-grade FastAPI extension toolkit.
 
-```bash
+It provides:
+✅ Redis-backed rate limiting  
+✅ JWT authentication  
+✅ RBAC permissions middleware  
+✅ Audit logs stored to database  
+✅ OpenTelemetry metrics/tracing  
+✅ Health + metrics endpoints built-in  
+
+🚀 Designed for real apps — not just examples.
+Install
 pip install fastapi-xkit
-```
-
-## Quick Example
-
-```python
+Quick Start
 from fastapi import FastAPI, Depends
-from fastapixkit import FastAPIXKitConfig, setup_fastapixkit
-from fastapixkit.security.jwt import require_jwt_user
-from fastapixkit.security.rbac import require_role
+from fastapixkit import FastAPIXKit
 
 app = FastAPI()
-
-config = FastAPIXKitConfig(
+kit = FastAPIXKit(
     jwt_secret="supersecret",
-    redis_url="redis://localhost:6379/0",
-    audit_db_url="sqlite:///./audit.db",
-    otel_enabled=False,
+    redis_url="redis://localhost:6379",
+    rbac_roles={
+        "admin": {"read", "write", "delete"},
+        "user": {"read"}
+    },
 )
 
-setup_fastapixkit(app, config)
+kit.init_app(app)
 
 @app.get("/secure")
-def secure(user=Depends(require_jwt_user(config))):
-    return {"user": user}
+def secure(user=Depends(kit.auth.require_jwt())):
+    return {"message": "Welcome!", "user": user}
+Features
+🛡️ JWT Auth
 
-@app.get("/admin")
-def admin(user=Depends(require_role(config, "admin"))):
-    return {"ok": True, "admin": user}
-```
+Fast token auth with easy user extraction.
 
-## JWT payload format
+🔐 RBAC
 
-Expected fields:
-- `sub` (user id)
-- `roles` (list of strings)
+Role-based access control middleware for routes.
 
-Example:
-```json
-{"sub":"123","roles":["admin","user"]}
-```
+🧠 Rate Limiting
 
-## OpenTelemetry
+Redis-powered, safe for containers and across nodes.
 
-If `otel_enabled=True`, the middleware exports traces to OTLP endpoint.
+📊 Observability
 
-Default OTLP endpoint: `http://localhost:4318`
+OpenTelemetry exporter → trace UI (Jaeger, Grafana Tempo).
 
-## Rate limiting
+📁 Audit Logs
 
-Redis counter per IP per minute.
+Logs are saved to PostgreSQL or any SQL via SQLAlchemy.
 
-## License
+Example Endpoints
+GET /health
+GET /metrics
+GET /secure (JWT required)
+Configuration Example
+kit = FastAPIXKit(
+    jwt_secret="MY_SECRET",
+    redis_url="redis://127.0.0.1:6379/0",
+    rbac_roles={
+        "admin": ["*"],
+        "editor": ["read", "write"],
+    }
+)
+Ecosystem Integrations
+
+✔ FastAPI
+✔ Starlette
+✔ SQLAlchemy
+✔ Redis
+✔ OpenTelemetry (auto metrics + tracing)
+
+Contributing
+
+PRs are very welcome! See CONTRIBUTING.md
+
+License
 
 MIT

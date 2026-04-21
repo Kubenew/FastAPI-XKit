@@ -1,0 +1,29 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis:7
+    container_name: fastapixkit_redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16
+    container_name: fastapixkit_postgres
+    environment:
+      POSTGRES_USER: fastapixkit
+      POSTGRES_PASSWORD: fastapixkit
+      POSTGRES_DB: fastapixkit_db
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.54
+    container_name: fastapixkit_jaeger
+    ports:
+      - "16686:16686"
+      - "4317:4317"
+      - "4318:4318"
+    restart: unless-stopped
